@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Verificación</title>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<style>
+
+body{
+    margin:0;
+    background:#0f172a;
+    font-family:Arial,sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    color:white;
+}
+
+.card{
+    background:white;
+    color:black;
+    padding:30px;
+    border-radius:20px;
+    text-align:center;
+    width:90%;
+    max-width:500px;
+}
+
+h1{
+    color:#16a34a;
+}
+
+#qr{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>LICENCIA AUTÉNTICA</h1>
+
+<div id="datos"></div>
+
+<div id="qr"></div>
+
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+
+const nombre = params.get('nombre');
+const fecha = params.get('fecha');
+const folio = params.get('folio');
+const modulo = params.get('modulo');
+
+document.getElementById('datos').innerHTML = `
+<strong>Nombre:</strong> ${nombre}<br><br>
+<strong>Fecha:</strong> ${fecha}<br><br>
+<strong>Folio:</strong> ${folio}<br><br>
+<strong>Módulo:</strong> ${modulo}
+`;
+
+QRCode.toCanvas(
+    document.createElement('canvas'),
+    window.location.href,
+    {
+        width:220
+    },
+    function(error, canvas){
+
+        if(error){
+            console.error(error);
+            return;
+        }
+
+        document.getElementById('qr').appendChild(canvas);
+    }
+);
+
+</script>
+
+</body>
+</html>
