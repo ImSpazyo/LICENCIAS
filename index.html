@@ -1,374 +1,367 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Gestión QR</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Librería QR -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<title>Sistema QR</title>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      getDocs
-    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+<!-- LIBRERÍA QR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-    // =====================================================
-    // CONFIGURACIÓN FIREBASE
-    // =====================================================
-    // Reemplaza estos datos con los tuyos desde Firebase
-    // https://firebase.google.com/
+<style>
 
-    <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#0f172a;
+    color:white;
+    padding:20px;
+}
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyA721T-ZTJdSb9eyInk1ujszRrZhBxYz60",
-    authDomain: "licencias-autenticas.firebaseapp.com",
-    projectId: "licencias-autenticas",
-    storageBucket: "licencias-autenticas.firebasestorage.app",
-    messagingSenderId: "243893323491",
-    appId: "1:243893323491:web:d3af86b349beffe6ae67d6"
-  };
+.container{
+    max-width:1000px;
+    margin:auto;
+}
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
+.card{
+    background:#1e293b;
+    padding:25px;
+    border-radius:20px;
+    margin-bottom:20px;
+    box-shadow:0 0 15px rgba(0,0,0,0.4);
+}
 
+h1{
+    text-align:center;
+    color:#38bdf8;
+}
 
-    // Inicializar Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+h2{
+    color:#22c55e;
+}
 
-    // =====================================================
-    // GENERAR QR
-    // =====================================================
+label{
+    display:block;
+    margin-top:15px;
+    margin-bottom:5px;
+    font-weight:bold;
+}
 
-    window.generarQR = async function () {
-      const nombre = document.getElementById('nombre').value;
-      const fecha = document.getElementById('fecha').value;
-      const folio = document.getElementById('folio').value;
-      const modulo = document.getElementById('modulo').value;
+input{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    box-sizing:border-box;
+}
 
-      if (!nombre || !fecha || !folio || !modulo) {
+button{
+    width:100%;
+    margin-top:20px;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.btn-primary{
+    background:#0ea5e9;
+    color:white;
+}
+
+.btn-download{
+    background:#16a34a;
+    color:white;
+}
+
+#resultado{
+    display:none;
+    background:white;
+    color:black;
+    padding:20px;
+    border-radius:20px;
+    text-align:center;
+}
+
+#qr-code{
+    display:flex;
+    justify-content:center;
+    margin-top:15px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+table th,
+table td{
+    border:1px solid #334155;
+    padding:10px;
+    text-align:center;
+}
+
+table th{
+    background:#0f172a;
+    color:white;
+}
+
+.btn-ver{
+    background:#16a34a;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h1>SISTEMA DE GESTIÓN QR</h1>
+
+<label>Nombre completo</label>
+<input type="text" id="nombre">
+
+<label>Fecha de expedición</label>
+<input type="date" id="fecha">
+
+<label>Folio</label>
+<input type="text" id="folio">
+
+<label>Módulo</label>
+<input type="text" id="modulo" value="adiweb">
+
+<button class="btn-primary" onclick="generarQR()">
+Generar y Guardar QR
+</button>
+
+</div>
+
+<div class="card" id="resultado">
+
+<h2>LICENCIA AUTÉNTICA</h2>
+
+<div id="qr-code"></div>
+
+<div id="datos" style="margin-top:15px"></div>
+
+<button class="btn-download" onclick="descargarQR()">
+Descargar PNG
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>Historial de registros</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Fecha</th>
+<th>Folio</th>
+<th>Módulo</th>
+<th>QR</th>
+</tr>
+</thead>
+
+<tbody id="tabla-registros"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+// =====================================
+// GENERAR QR
+// =====================================
+
+function generarQR(){
+
+    const nombre = document.getElementById('nombre').value;
+    const fecha = document.getElementById('fecha').value;
+    const folio = document.getElementById('folio').value;
+    const modulo = document.getElementById('modulo').value;
+
+    if(!nombre || !fecha || !folio || !modulo){
+
         alert('Completa todos los campos');
-        return;
-      }
 
-      const contenido = {
-        titulo: 'LICENCIA AUTÉNTICA',
+        return;
+    }
+
+    // =====================================
+    // URL QUE ABRIRÁ EL QR
+    // =====================================
+
+    const urlQR =
+    `${window.location.origin}${window.location.pathname.replace('index.html','')}verificar.html?nombre=${encodeURIComponent(nombre)}&fecha=${encodeURIComponent(fecha)}&folio=${encodeURIComponent(folio)}&modulo=${encodeURIComponent(modulo)}`;
+
+    // =====================================
+    // OBJETO
+    // =====================================
+
+    const contenido = {
         nombre,
         fecha,
         folio,
         modulo,
-        fechaRegistro: new Date().toISOString()
-      };
+        url:urlQR
+    };
 
-      // Guardar en Firebase
-      try {
-        await addDoc(collection(db, 'licencias'), contenido);
-      } catch (error) {
-        console.error(error);
-        alert('Error al guardar en Firebase');
-      }
+    // =====================================
+    // GUARDAR LOCALMENTE
+    // =====================================
 
-      // Mostrar QR
-      document.getElementById('qr-code').innerHTML = '';
+    let registros = JSON.parse(localStorage.getItem('licencias')) || [];
 
-      new QRCode(document.getElementById('qr-code'), {
-        text: JSON.stringify(contenido),
-        width: 220,
-        height: 220
-      });
+    registros.push(contenido);
 
-      // Mostrar datos
-      document.getElementById('datos').innerHTML = `
+    localStorage.setItem('licencias', JSON.stringify(registros));
+
+    // =====================================
+    // LIMPIAR QR
+    // =====================================
+
+    const qrContainer = document.getElementById('qr-code');
+
+    qrContainer.innerHTML = '';
+
+    // =====================================
+    // GENERAR QR
+    // =====================================
+
+    new QRCode(qrContainer,{
+        text:urlQR,
+        width:220,
+        height:220
+    });
+
+    // =====================================
+    // MOSTRAR DATOS
+    // =====================================
+
+    document.getElementById('datos').innerHTML = `
         <strong>Nombre:</strong> ${nombre}<br>
         <strong>Fecha:</strong> ${fecha}<br>
         <strong>Folio:</strong> ${folio}<br>
         <strong>Módulo:</strong> ${modulo}
-      `;
+    `;
 
-      document.getElementById('resultado').style.display = 'block';
+    document.getElementById('resultado').style.display='block';
 
-      cargarRegistros();
-    }
+    cargarRegistros();
+}
 
-    // =====================================================
-    // DESCARGAR QR PNG
-    // =====================================================
+// =====================================
+// DESCARGAR PNG
+// =====================================
 
-    window.descargarQR = function () {
-      const img = document.querySelector('#qr-code img');
+function descargarQR(){
 
-      if (!img) {
-        alert('Genera primero un QR');
+    const img = document.querySelector('#qr-code img');
+
+    if(!img){
+
+        alert('Primero genera un QR');
+
         return;
-      }
-
-      const link = document.createElement('a');
-      link.href = img.src;
-      link.download = 'qr_licencia.png';
-      link.click();
     }
 
-    // =====================================================
-    // CARGAR HISTORIAL
-    // =====================================================
+    const link = document.createElement('a');
 
-    async function cargarRegistros() {
-      const tabla = document.getElementById('tabla-registros');
-      tabla.innerHTML = '';
+    link.href = img.src;
 
-      const querySnapshot = await getDocs(collection(db, 'licencias'));
+    link.download = 'licencia_qr.png';
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
+    link.click();
+}
+
+// =====================================
+// HISTORIAL
+// =====================================
+
+function cargarRegistros(){
+
+    const tabla = document.getElementById('tabla-registros');
+
+    tabla.innerHTML='';
+
+    const registros = JSON.parse(localStorage.getItem('licencias')) || [];
+
+    registros.forEach((data,index)=>{
 
         tabla.innerHTML += `
-          <tr>
+        <tr>
             <td>${data.nombre}</td>
             <td>${data.fecha}</td>
             <td>${data.folio}</td>
             <td>${data.modulo}</td>
-          </tr>
+            <td>
+                <button class="btn-ver"
+                onclick="reconstruirQR(${index})">
+                Ver QR
+                </button>
+            </td>
+        </tr>
         `;
-      });
-    }
+    });
+}
 
-    window.onload = cargarRegistros;
-  </script>
+// =====================================
+// RECUPERAR QR
+// =====================================
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-      padding: 20px;
-    }
+function reconstruirQR(index){
 
-    .container {
-      max-width: 1000px;
-      margin: auto;
-    }
+    const registros = JSON.parse(localStorage.getItem('licencias')) || [];
 
-    .card {
-      background: #1e293b;
-      padding: 25px;
-      border-radius: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.4);
-    }
+    const data = registros[index];
 
-    h1 {
-      text-align: center;
-      color: #38bdf8;
-    }
+    const qrContainer = document.getElementById('qr-code');
 
-    h2 {
-      color: #22c55e;
-    }
+    qrContainer.innerHTML='';
 
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
+    new QRCode(qrContainer,{
+        text:data.url,
+        width:220,
+        height:220
+    });
 
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      font-size: 15px;
-      box-sizing: border-box;
-    }
+    document.getElementById('datos').innerHTML = `
+        <strong>Nombre:</strong> ${data.nombre}<br>
+        <strong>Fecha:</strong> ${data.fecha}<br>
+        <strong>Folio:</strong> ${data.folio}<br>
+        <strong>Módulo:</strong> ${data.modulo}
+    `;
 
-    button {
-      width: 100%;
-      margin-top: 20px;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+    document.getElementById('resultado').style.display='block';
+}
 
-    .btn-primary {
-      background: #0ea5e9;
-      color: white;
-    }
+// =====================================
+// INICIAR
+// =====================================
 
-    .btn-download {
-      background: #16a34a;
-      color: white;
-    }
+window.onload = cargarRegistros;
 
-    #resultado {
-      display: none;
-      background: white;
-      color: black;
-      padding: 20px;
-      border-radius: 20px;
-      text-align: center;
-    }
+</script>
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    table th,
-    table td {
-      border: 1px solid #334155;
-      padding: 10px;
-      text-align: center;
-    }
-
-    table th {
-      background: #0f172a;
-    }
-
-    .documentacion {
-      line-height: 1.7;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-
-    <div class="card">
-      <h1>SISTEMA DE GESTIÓN QR</h1>
-
-      <label>Nombre completo</label>
-      <input type="text" id="nombre">
-
-      <label>Fecha de expedición</label>
-      <input type="date" id="fecha">
-
-      <label>Folio</label>
-      <input type="text" id="folio">
-
-      <label>Módulo</label>
-      <input type="text" id="modulo" value="adiweb">
-
-      <button class="btn-primary" onclick="generarQR()">
-        Generar y Guardar QR
-      </button>
-    </div>
-
-    <div class="card" id="resultado">
-      <h2>LICENCIA AUTÉNTICA</h2>
-
-      <div id="qr-code"></div>
-
-      <div id="datos" style="margin-top:15px"></div>
-
-      <button class="btn-download" onclick="descargarQR()">
-        Descargar PNG
-      </button>
-    </div>
-
-    <div class="card">
-      <h2>Historial de Registros</h2>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Fecha</th>
-            <th>Folio</th>
-            <th>Módulo</th>
-          </tr>
-        </thead>
-
-        <tbody id="tabla-registros"></tbody>
-      </table>
-    </div>
-
-    <div class="card documentacion">
-      <h2>DOCUMENTACIÓN DEL SISTEMA</h2>
-
-      <h3>1. Objetivo</h3>
-      <p>
-        El sistema permite generar códigos QR dinámicos con información
-        personalizada y almacenarlos en una base de datos en la nube.
-      </p>
-
-      <h3>2. Tecnologías utilizadas</h3>
-      <ul>
-        <li>HTML5</li>
-        <li>CSS3</li>
-        <li>JavaScript</li>
-        <li>Firebase Firestore</li>
-        <li>QRCode.js</li>
-      </ul>
-
-      <h3>3. Funcionalidades</h3>
-      <ul>
-        <li>Captura de datos</li>
-        <li>Generación de QR</li>
-        <li>Descarga en PNG</li>
-        <li>Base de datos en la nube</li>
-        <li>Historial automático</li>
-      </ul>
-
-      <h3>4. Estructura de la base de datos</h3>
-
-      <p>Colección: <strong>licencias</strong></p>
-
-      <ul>
-        <li>nombre</li>
-        <li>fecha</li>
-        <li>folio</li>
-        <li>modulo</li>
-        <li>fechaRegistro</li>
-      </ul>
-
-      <h3>5. Cómo hostear gratis</h3>
-
-      <ol>
-        <li>Crear cuenta en GitHub</li>
-        <li>Subir el archivo index.html</li>
-        <li>Activar GitHub Pages</li>
-        <li>Usar Firebase para la base de datos</li>
-      </ol>
-
-      <h3>6. Firebase</h3>
-
-      <p>
-        Crear proyecto en Firebase y habilitar Firestore Database.
-      </p>
-
-      <p>
-        Sitio oficial:
-        https://firebase.google.com/
-      </p>
-
-      <h3>7. Posibles mejoras</h3>
-      <ul>
-        <li>Inicio de sesión</li>
-        <li>Panel administrador</li>
-        <li>Filtros de búsqueda</li>
-        <li>Exportar Excel</li>
-        <li>Validación QR</li>
-        <li>Modo impresión</li>
-      </ul>
-    </div>
-
-  </div>
 </body>
 </html>
