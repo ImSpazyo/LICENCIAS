@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Verificación</title>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 
 body{
     margin:0;
     background:#0f172a;
-    font-family:Arial,sans-serif;
     display:flex;
     justify-content:center;
     align-items:center;
     min-height:100vh;
+    font-family:Arial,sans-serif;
     color:white;
 }
 
@@ -30,16 +29,23 @@ body{
     text-align:center;
     width:90%;
     max-width:500px;
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
 
 h1{
     color:#16a34a;
+    margin-bottom:20px;
 }
 
 #qr{
     margin-top:20px;
     display:flex;
     justify-content:center;
+}
+
+.info{
+    line-height:2;
+    font-size:18px;
 }
 
 </style>
@@ -51,7 +57,7 @@ h1{
 
 <h1>LICENCIA AUTÉNTICA</h1>
 
-<div id="datos"></div>
+<div class="info" id="datos"></div>
 
 <div id="qr"></div>
 
@@ -66,29 +72,26 @@ const fecha = params.get('fecha');
 const folio = params.get('folio');
 const modulo = params.get('modulo');
 
+// =====================================
+// MOSTRAR DATOS
+// =====================================
+
 document.getElementById('datos').innerHTML = `
-<strong>Nombre:</strong> ${nombre}<br><br>
-<strong>Fecha:</strong> ${fecha}<br><br>
-<strong>Folio:</strong> ${folio}<br><br>
+<strong>Nombre:</strong> ${nombre}<br>
+<strong>Fecha:</strong> ${fecha}<br>
+<strong>Folio:</strong> ${folio}<br>
 <strong>Módulo:</strong> ${modulo}
 `;
 
-QRCode.toCanvas(
-    document.createElement('canvas'),
-    window.location.href,
-    {
-        width:220
-    },
-    function(error, canvas){
+// =====================================
+// CREAR QR CENTRADO
+// =====================================
 
-        if(error){
-            console.error(error);
-            return;
-        }
-
-        document.getElementById('qr').appendChild(canvas);
-    }
-);
+new QRCode(document.getElementById('qr'),{
+    text:window.location.href,
+    width:220,
+    height:220
+});
 
 </script>
 
